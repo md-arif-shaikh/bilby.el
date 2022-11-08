@@ -43,19 +43,25 @@
 	 (out-files (file-expand-wildcards (file-name-concat data-analysis-dir "*.out") t))
 	 (out-status))
     (setq out-status (cl-loop for out-file in out-files
-			      collect (cons (file-name-base out-file) (bilby--get-last-line out-file))))
+			      collect (list (file-name-directory out-file) (file-name-base out-file) (bilby--get-last-line out-file))))
     out-status))
 
 (defun bilby-check-out-status (out-dir)
   "Check status of run in OUT-DIR."
   (interactive (list (read-directory-name "Enter outdir for Bilby run: ")))
-  (let ((status (bilby--get-out-status out-dir)))
+  (let ((status (bilby--get-out-status out-dir))
+	(previous-dir ""))
    (with-current-buffer (generate-new-buffer (string-replace "/" "-" out-dir))
-     (insert (format "Status of %s chains in %s\n" (length status) out-dir))
-     (insert "------------------------------------------------------------------------------------------------------------------------------------\n")
+     (dolist (stat status)
+       (unless (string-equal (nth 0 stat) previous-dir)
+	 (insert "------------------------------------------------------------------------------------------------------------------------------------\n")
+	 (insert (format "Status of chains in %s\n" (nth 0 stat)))
+	 (insert "------------------------------------------------------------------------------------------------------------------------------------\n"))
+       (setq previous-dir (nth 0 stat))
+       (insert (nth 1 stat) " " (nth 2 stat) "\n"))
      (switch-to-buffer-other-frame (string-replace "/" "-" out-dir)))))
 
-(bilby-check-out-status "/home1/md.shaikh/eccimrct/nr1359/flow20/golden_mass/nlive_2048_nact_10_zero-noise_IMRPhenomXPHM/injection_0/05Nov2022/inspiral")
+(bilby-check-out-status "/home1/md.shaikh/eccimrct/nr1359/flow20/golden_mass/nlive_2048_nact_10_zero-noise*/injection_0/05Nov2022/*inspiral")
 
 (provide 'bilby)
 ;;; bilby.el ends here
