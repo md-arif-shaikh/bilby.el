@@ -58,7 +58,8 @@
 	 (insert (format "Status of chains in %s\n" (nth 0 stat)))
 	 (insert "------------------------------------------------------------------------------------------------------------------------------------\n"))
        (setq previous-dir (nth 0 stat))
-       (insert (nth 1 stat) " " (nth 2 stat) "\n"))
+       (insert (nth 1 stat) " " (let ((last-line (nth 2 stat)))
+				  (if (string-search "100%" last-line) "Finished" last-line)) "\n"))
      (switch-to-buffer-other-frame (string-replace "/" "-" out-dir)))))
 
 (bilby-check-out-status "/home1/md.shaikh/eccimrct/nr1359/flow20/golden_mass/nlive_2048_nact_10_zero-noise*/injection_0/05Nov2022/*inspiral")
