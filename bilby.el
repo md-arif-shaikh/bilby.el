@@ -24,7 +24,6 @@
 
 ;;; Code:
 (require 'cl)
-
 (defun bilby--get-last-line (file-name)
   "Get the last line in FILE-NAME."
   (let* ((base-name (file-name-base file-name))
@@ -32,8 +31,10 @@
 	 (buffer-name (concat base-name "." extension))
 	 (last-line))
     (setq last-line (with-current-buffer (find-file-noselect file-name)
-		      (goto-char (point-max))
-		      (string-trim (thing-at-point 'line t))))
+		      (if (> (buffer-size) 0)
+			  (progn (goto-char (point-max))
+				 (string-trim (thing-at-point 'line t)))
+			"")))
     (kill-buffer buffer-name)
     last-line))
 
@@ -42,8 +43,8 @@
   (let* ((data-analysis-dir (file-name-concat out-dir "log_data_analysis"))
 	 (out-files (file-expand-wildcards (file-name-concat data-analysis-dir "*.out") t))
 	 (out-status))
-    (setq out-status (cl-loop for out-file in out-files
-			      collect (list (file-name-directory out-file) (file-name-base out-file) (bilby--get-last-line out-file))))
+    (setq out-status (loop for out-file in out-files
+			   collect (list (file-name-directory out-file) (file-name-base out-file) (bilby--get-last-line out-file))))
     out-status))
 
 (defun bilby-check-out-status (out-dir)
